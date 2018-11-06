@@ -1,7 +1,12 @@
 import os, json, re, string
 
 # Path to directory containing all training data
-path_to_json = 'C:\\Users\\Alex\\virtualenvironment\\421\\Sample Data\\'
+path_to_json = os.path.dirname(os.path.abspath(__file__))
+path_to_json += "\\Sample Data\\"
+#path_to_json = 'C:\\Users\\Alex\\virtualenvironment\\421\\Sample Data\\'
+print(path_to_json)
+
+exit()
 
 def load_training_data(data_path):
     
@@ -42,5 +47,5 @@ for x in contents:
 
 bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
 
-print(bigrams)
+#print(bigrams)
 
