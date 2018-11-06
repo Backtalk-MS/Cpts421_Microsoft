@@ -29,8 +29,9 @@ def load_training_data(data_path):
 
 labels, contents = load_training_data(path_to_json)
 
+# Function to strip punctuation
 def strip_punctuation(s):
-    return ''.join(c for c in s if c not in punctuation)
+    return ''.join(c for c in s if c not in string.punctuation)
 
 
 unique_categories = []
@@ -40,10 +41,12 @@ for x in labels:
         unique_categories.append(x)
 #print(unique_categories)
 
-for x in contents:
-    strip_punctuation(x)
 
-bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
+for x in range(len(contents)):
+    contents[x] = strip_punctuation(contents[x])
 
-print(bigrams)
+
+#bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
+
+#print(bigrams)
 
