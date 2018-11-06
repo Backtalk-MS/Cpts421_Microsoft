@@ -1,0 +1,20 @@
+Needs
+    Easy to Install
+    Customizable (Developer tools)
+    Easy access to data
+    Visually Representing Data?
+    Fast AI to categorize
+    Accurate AI
+    Light on Memory or Data (Space Complexity)
+    Maintainability
+    Security
+Metrics
+    Number of steps to install
+    Number of functions to be potentially implemented
+    Few steps to reach developer's data
+    Functions to attach graphs
+    Time to perform the AI process
+    Statistics with % of accuracy
+    Memory used
+    Abstract vs. Instability (chart)
+    Encryption - what kind
