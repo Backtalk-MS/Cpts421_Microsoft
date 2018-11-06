@@ -1,11 +1,11 @@
-import os, json, re, string
-from string import punctuation
+import os, json, re, string, nltk
+from nltk import word_tokenize
+from nltk.util import ngrams
+from collections import Counter
 
 # Path to directory containing all training data
 path_to_json = os.path.dirname(os.path.abspath(__file__))
 path_to_json += "\\Sample Data\\"
-#path_to_json = 'C:\\Users\\Alex\\virtualenvironment\\421\\Sample Data\\'
-
 
 def load_training_data(data_path):
     
@@ -22,12 +22,27 @@ def load_training_data(data_path):
         with open(path_to_json + file) as json_file:
             data = json.load(json_file)
             for p in data:
-                train_texts.append(p['content'].lower())
-                train_labels.append(p['category'])
+                if(p['category'] == 'msoffice'):#Only from one category
+                    train_texts.append(p['content'].lower())
+                    train_labels.append(p['category'])
 
     return((train_labels, train_texts))
 
 labels, contents = load_training_data(path_to_json)
+
+def setupData(trainContents, trainLabels):
+    bigrams = []
+    token = list()
+    counter = 0
+    for docContents in trainContents:
+        token += nltk.word_tokenize(docContents)
+        bigrams = ngrams(token, 2)
+    for key, value in Counter(bigrams).items():
+        if value >= 250:
+            print(key)
+            counter += 1
+            print("Found " + str(counter) + " having atleast 250")
+    #print(Counter(bigrams))
 
 # Function to strip punctuation
 def strip_punctuation(s):
@@ -40,7 +55,6 @@ for x in labels:
     if x not in unique_categories:
         unique_categories.append(x)
 #print(unique_categories)
-
 
 for x in range(len(contents)):
     contents[x] = strip_punctuation(contents[x])
