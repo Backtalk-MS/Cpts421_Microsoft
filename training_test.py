@@ -45,8 +45,12 @@ for x in labels:
 for x in range(len(contents)):
     contents[x] = strip_punctuation(contents[x])
 
+ 
+bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
 
-#bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
+unigrams = []
+for string in contents:
+    unigrams.append(string.split())
 
-#print(bigrams)
+print(unigrams)
 
