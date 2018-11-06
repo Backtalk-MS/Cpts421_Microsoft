@@ -8,7 +8,7 @@ path_to_json = os.path.dirname(os.path.abspath(__file__))
 path_to_json += "\\Sample Data\\"
 
 def load_training_data(data_path):
-    
+    """Description of function"""
     json_filelist = os.listdir(path_to_json)
 
     # Load the training data
@@ -28,9 +28,9 @@ def load_training_data(data_path):
 
     return((train_labels, train_texts))
 
-labels, contents = load_training_data(path_to_json)
-
-def setupData(trainContents, trainLabels):
+def tokenizeData(trainContents, trainLabels):
+    """Description of function"""
+    cleanData()
     bigrams = []
     token = list()
     counter = 0
@@ -46,22 +46,27 @@ def setupData(trainContents, trainLabels):
 
 # Function to strip punctuation
 def strip_punctuation(s):
+    """Description of function"""
     return ''.join(c for c in s if c not in string.punctuation)
 
-
 unique_categories = []
+def setupUniqueCategories(labels, categories):
+    """Description of function"""
+    for x in labels:
+        if x not in categories:
+            categories.append(x)
+    #print(unique_categories)
 
-for x in labels:
-    if x not in unique_categories:
-        unique_categories.append(x)
-#print(unique_categories)
+def cleanData():
+    for x in range(len(contents)):
+        contents[x] = strip_punctuation(contents[x])
 
-for x in range(len(contents)):
-    contents[x] = strip_punctuation(contents[x])
+#Program here
+labels, contents = load_training_data(path_to_json)
+setupUniqueCategories(labels, unique_categories)
+tokenizeData(contents, labels)
 
-setupData(contents, labels)
-exit()
-
+exit()#Program stops here
 
 bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
 unigrams = []
