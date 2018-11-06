@@ -1,4 +1,5 @@
 import os, json, re, string
+from string import punctuation
 
 # Path to directory containing all training data
 path_to_json = os.path.dirname(os.path.abspath(__file__))
@@ -26,8 +27,10 @@ def load_training_data(data_path):
 
 labels, contents = load_training_data(path_to_json)
 
-def stripPunctuation(s):
-    return ''.join(ch for ch in s if ch not in string.punctuation)
+# Function to strip punctuation
+def strip_punctuation(s):
+    return ''.join(c for c in s if c not in string.punctuation)
+
 
 unique_categories = []
 
@@ -36,10 +39,10 @@ for x in labels:
         unique_categories.append(x)
 #print(unique_categories)
 
-for x in contents:
-    x = stripPunctuation(x)
-    #print(x)
+for x in range(len(contents)):
+    contents[x] = strip_punctuation(contents[x])
 
+#bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
 
 bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
 print(bigrams[100])
