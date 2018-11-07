@@ -8,7 +8,8 @@ path_to_json = os.path.dirname(os.path.abspath(__file__))
 path_to_json += "\\Sample Data\\"
 
 def load_training_data(data_path):
-    """Description of function"""
+    """Reads the scrapped json documents stored on the local machine and load
+    contents and its categories into data."""
     json_filelist = os.listdir(path_to_json)
 
     # Load the training data
@@ -29,14 +30,15 @@ def load_training_data(data_path):
     return((train_labels, train_texts))
 
 def tokenizeData(trainContents, trainLabels):
-    """Description of function"""
+    """From the data in memory, tokenize the data into bigrams."""
     cleanData()
     bigrams = []
     token = list()
     counter = 0
     for docContents in trainContents:
         token += nltk.word_tokenize(docContents)
-        bigrams = ngrams(token, 2)
+        bigrams = ngrams(token, 2)#Tokenize
+    #For printing the most frequent bi-gram
     for key, value in Counter(bigrams).items():
         if value >= 250:
             print(key)
@@ -46,22 +48,24 @@ def tokenizeData(trainContents, trainLabels):
 
 # Function to strip punctuation
 def strip_punctuation(s):
-    """Description of function"""
+    """Helper function to strip the unnecessary punctuation to
+    get bigrams of WORDS only."""
     return ''.join(c for c in s if c not in string.punctuation)
 
 unique_categories = []
 def setupUniqueCategories(labels, categories):
-    """Description of function"""
+    """Store categories of each entry according to the categories."""
     for x in labels:
         if x not in categories:
             categories.append(x)
     #print(unique_categories)
 
 def cleanData():
+    """Calls helper function for each entry and strips the punctuation."""
     for x in range(len(contents)):
         contents[x] = strip_punctuation(contents[x])
 
-#Program here
+#Program starts here
 labels, contents = load_training_data(path_to_json)
 setupUniqueCategories(labels, unique_categories)
 tokenizeData(contents, labels)
