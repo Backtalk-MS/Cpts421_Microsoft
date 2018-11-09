@@ -80,7 +80,7 @@ driver = webdriver.Chrome(options=options)
 driver.implicitly_wait(30)
 main_category = sys.argv[1]
 sub_category = sys.argv[2]
-# Navigate to the application home page
+
 url="https://answers.microsoft.com/en-us/{}/forum/{}?sort=CreatedDate&dir=Asc&tab=Threads&status=all&mod=&modAge=&advFil=&postedAfter=2014-10-12&postedBefore=2014-10-13&threadType=questions&isFilterExpanded=true&page=1".format(main_category,sub_category)
 
 start_date = datetime.date(int(sys.argv[6]),int(sys.argv[4]),int(sys.argv[5]))
@@ -101,7 +101,7 @@ while var_date > start_date:
         next_day = start_date
     links = get_forum_links_from_webpage_on_dates(url,driver,"{}/{}/{}".format(next_day.month,next_day.day,next_day.year),"{}/{}/{}".format(var_date.month,var_date.day,var_date.year))
     if len(links) == 0:
-        day_delta+=1
+        day_delta*=2
         sequential_failures+=1
     else:
         if day_delta > 1:
@@ -112,17 +112,10 @@ while var_date > start_date:
     var_date = next_day
     total_elements_found += len(links)
     print("day: {}, day_delta: {}, sequential failures: {}, total elements found: {}".format(var_date,day_delta, sequential_failures, total_elements_found))
-    if(sequential_failures == 10):
+    if sequential_failures >= 10:
         print("Exceeded failure tolerance")
         break
 f.close()
 
 # close the browser window
 driver.quit()
-
-# for day in date_generator(start_date,end_date):
-#     next_day = day + datetime.timedelta(days=int(sys.argv[3]))
-#     if next_day > end_date: break
-#     for link in get_forum_links_from_webpage_on_dates(url,driver,"{}/{}/{}".format(day.month,day.day,day.year),"{}/{}/{}".format(next_day.month,next_day.day,next_day.year)):
-#         f.write(link+'\n')
-# f.close()
