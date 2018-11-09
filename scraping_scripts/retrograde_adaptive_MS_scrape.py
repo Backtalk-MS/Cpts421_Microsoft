@@ -76,6 +76,7 @@ def get_forum_links_from_webpage_on_dates(url, driver, posted_after_date, posted
 options = Options()
 options.add_argument('--headless')
 options.add_argument('--disable-gpu')
+options.add_argument('log-level=3')
 driver = webdriver.Chrome(options=options)
 driver.implicitly_wait(30)
 main_category = sys.argv[1]
@@ -95,7 +96,7 @@ total_elements_found = 0
 sequential_failures = 0
 
 while var_date > start_date:
-    print(var_date)
+    # print(var_date)
     next_day = var_date - datetime.timedelta(days=day_delta)
     if next_day < start_date:
         next_day = start_date
@@ -111,8 +112,8 @@ while var_date > start_date:
             f.write(link+'\n')
     var_date = next_day
     total_elements_found += len(links)
-    print("day: {}, day_delta: {}, sequential failures: {}, total elements found: {}".format(var_date,day_delta, sequential_failures, total_elements_found))
-    if sequential_failures >= 10:
+    print("{}:{} === day: {}, day_delta: {}, sequential failures: {}, total elements found: {}".format(main_category,sub_category,var_date,day_delta, sequential_failures, total_elements_found))
+    if sequential_failures >= 8:
         print("Exceeded failure tolerance")
         break
 f.close()
