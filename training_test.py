@@ -33,11 +33,13 @@ def tokenizeData(trainContents, trainLabels):
     """From the data in memory, tokenize the data into bigrams."""
     cleanData()
     bigrams = []
+    unigrams = []
     token = list()
     counter = 0
     for docContents in trainContents:
         token += nltk.word_tokenize(docContents)
-        bigrams = ngrams(token, 2)#Tokenize
+        bigrams = ngrams(token, 2)  #Tokenize into bigrams
+        unigrams = ngrams(token, 1) #Tokenize into unigrams
     #For printing the most frequent bi-gram
     for key, value in Counter(bigrams).items():
         if value >= 250:
@@ -79,4 +81,3 @@ for string in contents:
     unigrams.append(string.split())
 
 print(unigrams)
-
