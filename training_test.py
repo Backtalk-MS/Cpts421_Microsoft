@@ -41,13 +41,19 @@ def tokenizeData(trainContents, trainLabels):
         bigrams = ngrams(token, 2)  #Tokenize into bigrams
         unigrams = ngrams(token, 1) #Tokenize into unigrams
     #For printing the most frequent bi-gram
-    for key, value in Counter(bigrams).items():
-        if value >= 250:
-            print(key)
-            counter += 1
-            print("Found " + str(counter) + " having atleast 250")
+    #for key, value in Counter(bigrams).items():
+    #    if value >= 250:
+    #        print(key)
+    #        counter += 1
+    #        print("Found " + str(counter) + " having atleast 250")
     #print(Counter(bigrams))
+    #print(token)
+    return unigrams, bigrams
 
+def vectorizeData(unigrams, bigrams):
+    uniVectors = []
+    biVectors = []
+    return uniVectors, biVectors
 # Function to strip punctuation
 def strip_punctuation(s):
     """Helper function to strip the unnecessary punctuation to
@@ -68,9 +74,14 @@ def cleanData():
         contents[x] = strip_punctuation(contents[x])
 
 #Program starts here
+unigrams = []
+bigrams =[]
+unigramVectors = []
+bigramVectors = []
 labels, contents = load_training_data(path_to_json)
 setupUniqueCategories(labels, unique_categories)
-tokenizeData(contents, labels)
+unigrams, bigrams = tokenizeData(contents, labels)
+unigramVectors, bigramVectors = vectorizeData(unigrams, bigrams)
 
 exit()#Program stops here
 
