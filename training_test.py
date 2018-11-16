@@ -26,7 +26,7 @@ def load_training_data(data_path):
                 if(p['category'] == 'msoffice'):#Only from one category
                     train_texts.append(p['content'].lower())
                     train_labels.append(p['category'])
-
+    print(train_labels)
     return((train_labels, train_texts))
 
 def tokenizeData(trainContents, trainLabels):
