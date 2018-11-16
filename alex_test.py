@@ -1,7 +1,6 @@
-import os, json, re, string, nltk
-from nltk import word_tokenize
-from nltk.util import ngrams
-from collections import Counter
+import os, json, re, string, pandas
+from tensorflow.keras import models
+from keras.preprocessing.text import Tokenizer
 
 # Path to directory containing all training data
 path_to_json = os.path.dirname(os.path.abspath(__file__))
@@ -16,39 +15,18 @@ def load_training_data(data_path):
     # For every json file in the directory, load up the contents of it and
     # the labels
     train_texts = []
-    train_labels = []
+    train_labels = ["text", "category", "subcategory"]
 
     for file in json_filelist:
         #print(file)
         with open(path_to_json + file) as json_file:
             data = json.load(json_file)
             for p in data:
-                if(p['category'] == 'msoffice'):#Only from one category
-                    train_texts.append(p['content'].lower())
-                    train_labels.append(p['category'])
-    print(train_labels)
-    return((train_labels, train_texts))
+                train_texts.append((p['content'], p['category'], p['subcategory']))
+    data = pandas.DataFrame.from_records(train_texts, columns=train_labels)                
+    print(data)
+    return #((train_labels, train_texts))
 
-def tokenizeData(trainContents, trainLabels):
-    """From the data in memory, tokenize the data into bigrams."""
-    cleanData()
-    bigrams = []
-    unigrams = []
-    token = list()
-    counter = 0
-    for docContents in trainContents:
-        token += nltk.word_tokenize(docContents)
-        bigrams = ngrams(token, 2)  #Tokenize into bigrams
-        unigrams = ngrams(token, 1) #Tokenize into unigrams
-    #For printing the most frequent bi-gram
-    #for key, value in Counter(bigrams).items():
-    #    if value >= 250:
-    #        print(key)
-    #        counter += 1
-    #        print("Found " + str(counter) + " having atleast 250")
-    #print(Counter(bigrams))
-    #print(token)
-    return unigrams, bigrams
 
 def vectorizeData(unigrams, bigrams):
     uniVectors = []
@@ -78,17 +56,9 @@ unigrams = []
 bigrams =[]
 unigramVectors = []
 bigramVectors = []
-labels, contents = load_training_data(path_to_json)
-setupUniqueCategories(labels, unique_categories)
-unigrams, bigrams = tokenizeData(contents, labels)
-unigramVectors, bigramVectors = vectorizeData(unigrams, bigrams)
+load_training_data(path_to_json)
+#labels, contents = load_training_data(path_to_json)
+#setupUniqueCategories(labels, unique_categories)
+#unigramVectors, bigramVectors = vectorizeData(unigrams, bigrams)
 
 exit()#Program stops here
-
-bigrams = [b for l in contents for b in zip(l.split(" ")[:-1], l.split(" ")[1:])]
-
-unigrams = []
-for string in contents:
-    unigrams.append(string.split())
-
-print(unigrams)
