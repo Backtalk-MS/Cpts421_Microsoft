@@ -32,26 +32,7 @@ def load_training_data(data_path):
     #print(data)
     return data
 
-
-def vectorizeData(unigrams, bigrams):
-    uniVectors = []
-    biVectors = []
-    return uniVectors, biVectors
-# Function to strip punctuation
-def strip_punctuation(s):
-    """Helper function to strip the unnecessary punctuation to
-    get bigrams of WORDS only."""
-    return ''.join(c for c in s if c not in string.punctuation)
-
-unique_categories = []
-def setupUniqueCategories(labels, categories):
-    """Store categories of each entry according to the categories."""
-    for x in labels:
-        if x not in categories:
-            categories.append(x)
-    #print(unique_categories)
-
-def tokenizeData(data):
+def train_model(data):
     train_size = int(len(data) * .8)
     
     train_text = data['text'][:train_size]
@@ -89,7 +70,7 @@ def tokenizeData(data):
 
     history = model.fit(x_train, y_train, batch_size=batch_size, epochs=30, verbose=1, validation_split=0.1)
 
-    model.model.save('test_model.h5')
+    model.save('test_model.h5')
 
     with open('tokenizer.pickle', 'wb') as handle:
         pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -101,14 +82,7 @@ def tokenizeData(data):
     return
 
 #Program starts here
-unigrams = []
-bigrams =[]
-unigramVectors = []
-bigramVectors = []
 data = load_training_data(path_to_json)
-tokenizeData(data)
-#labels, contents = load_training_data(path_to_json)
-#setupUniqueCategories(labels, unique_categories)
-#unigramVectors, bigramVectors = vectorizeData(unigrams, bigrams)
+train_model(data)
 
 exit()#Program stops here
