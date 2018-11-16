@@ -11,6 +11,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Files from ML Model
+*.h5
+*.pickle
+
 # Distribution / packaging
 .Python
 build/
