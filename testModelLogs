@@ -1,0 +1,29 @@
+1st Try:
+    Accuracy - .872
+    1 Layer
+        512 size
+    2 Layer
+        4 size
+    Duration: ~10 minutes
+
+2nd Try:
+    Accuracy - .8745
+    1 Layer
+        Size = 128
+    2 Layer
+        Size = 64
+    3 Layer
+        Size = 4
+    
+    Duration: ~4 minutes
+
+3rd Try
+    Accuracy - .8762
+    1 Layer 
+        Size = 64
+    2 Layer 
+        Size = 64
+    3 Layer
+        Size = 4
+    
+    Duration: ~2 minutes
