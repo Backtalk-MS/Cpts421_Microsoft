@@ -4,10 +4,10 @@ var files = []
 
 fs.readdirSync("./json/").forEach(file => files.push(file));
 
-mongoose.connect("mongodb://aminich:5WOXsas5o8bQVSIapi3i4fH6jAZGD7hSu2EvmjqP0HbxlB0PFXRK1OnKihWu26YHltGxkXfQSVasw4hFaLp9xw==@aminich.documents.azure.com:10255/?ssl=true&replicaSet=globaldb", {
+mongoose.connect("#URI HERE#", {
     auth: {
-      user: "aminich",
-      password: "5WOXsas5o8bQVSIapi3i4fH6jAZGD7hSu2EvmjqP0HbxlB0PFXRK1OnKihWu26YHltGxkXfQSVasw4hFaLp9xw=="
+      user: "#USERNAME HERE#",
+      password: "#PASSWORD HERE#"
     },
     useNewUrlParser: true
   })
