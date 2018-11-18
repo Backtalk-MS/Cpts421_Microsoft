@@ -1,6 +1,6 @@
 import pymongo, os, json, time
 
-uri = "mongodb://aminich:5WOXsas5o8bQVSIapi3i4fH6jAZGD7hSu2EvmjqP0HbxlB0PFXRK1OnKihWu26YHltGxkXfQSVasw4hFaLp9xw==@aminich.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+uri = ""
 client = pymongo.MongoClient(uri)
 db = client['admin']
 collection = db['posts']
