@@ -21,7 +21,6 @@ categories_dict = {"windows": ["start","hardware","desktop","ecoms","files","gam
                     }
 process_pool = []
 for main_cat in categories_dict:
-    process_pool = []
     for sub_cat in categories_dict[main_cat]:
         print("{} {}".format(main_cat,sub_cat))
         process_pool.append(Popen("py retrograde_scrape.py {} {} 1 11 5 2017".format(main_cat,sub_cat)))
