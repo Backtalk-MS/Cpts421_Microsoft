@@ -107,12 +107,23 @@ def buildModel(num_labels, vocab_size, x_train, y_train, batch_size):
         model.save("testModel.h5")
         return model
 
-def predictCategory(userInput):
+def predictCategory(model, userInput):
     """With given input from user, predicts what category.
-    PARAMETERS - user input as text
+    PARAMETERS - an AI model as a keras model and user input as
+        text to categorize (predict to)
     RETURN - updated model"""
 
-    print("prediciton here")
+    print("predictCategory() not yet implemented")
+    return model
+
+def insertIntoDatabase(contents):
+    """Inputs given contents to the set database.
+    PARAMETERS - contents as an array for either a string
+        or a string and the predicted category.
+    RETURN - NULL"""
+
+    print("insertIntoDatabase() not yet implemented")
+    return
 
 
 
