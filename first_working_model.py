@@ -1,14 +1,16 @@
 import os, json, re, string, pandas, numpy, pickle
+from pathlib import Path
 from tensorflow.keras import models
 from keras.models import Sequential
+from keras.models import load_model
 from keras.layers import Activation, Dense, Dropout
 from keras.preprocessing.text import Tokenizer
 from sklearn.preprocessing import LabelBinarizer 
 
 
 # Path to directory containing all training data
-path_to_json = os.path.dirname(os.path.abspath(__file__))
-path_to_json += "\\Sample Data\\"
+localPath = os.path.dirname(os.path.abspath(__file__))
+path_to_json = localPath + "\\Sample Data\\"
 
 def load_training_data(data_path):
     """Reads the scrapped json documents stored on the local machine and load
@@ -33,17 +35,23 @@ def load_training_data(data_path):
     return data
 
 def train_model(data):
+    """From loaded data, train model based on text (content) and LABELS.
+    PARAMETER - data to train and test from
+    RETURN - trained model
+    """
+
+    LABELS = "subcategory"
     train_size = int(len(data) * .8)
     
     train_text = data['text'][:train_size]
-    train_tags = data['category'][:train_size]
+    train_tags = data[LABELS][:train_size]
 
     test_text = data['text'][train_size:]
-    test_tags = data['category'][train_size:]
+    test_tags = data[LABELS][train_size:]
 
     #print(len(set(data['category'])))
-    # Dyamically set the number of categories
-    num_labels = len(set(data['category']))
+    # Dyamically set the number of LABELS
+    num_labels = len(set(data[LABELS]))
     vocab_size = 15000
     batch_size = 100
 
@@ -58,28 +66,55 @@ def train_model(data):
     y_train = encoder.transform(train_tags)
     y_test = encoder.transform(test_tags)
 
-    model = Sequential()
-    model.add(Dense(512, input_shape=(vocab_size,)))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.3))
-    model.add(Dense(num_labels))
-    model.add(Activation('softmax'))
-    model.summary()
+    myModel = buildModel(num_labels, vocab_size, x_train, y_train, batch_size)
 
-    model.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
-
-    history = model.fit(x_train, y_train, batch_size=batch_size, epochs=30, verbose=1, validation_split=0.1)
-
-    model.save('test_model.h5')
-
-    with open('tokenizer.pickle', 'wb') as handle:
+    with open('tokenizer.pickle', 'wb') as handle:#Saves tokens to help for speeding up next run
         pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    score = model.evaluate(x_test, y_test, batch_size=batch_size, verbose=1)
+    score = myModel.evaluate(x_test, y_test, batch_size=batch_size, verbose=1)
 
     print('Test Accuracy: ', score[1])
-    #print(y_train)
+    print("Score: ", score) #[2.1682879958161054, 0.6556665238172553]
     return
+
+#Currently does more than just buildModel. Needs refactoring
+def buildModel(num_labels, vocab_size, x_train, y_train, batch_size):
+    """Loads the a previously trained AI model that's located in MODEL_PATH
+    if exists, otherwise builds the model from scratch.
+    PARAMETER - the number of labels (num_labels), the size of the vocabulary
+        (vocab_size), x_train, y_train, and the rate of the learning (batch_size)
+    RETURN - the built model"""
+    
+    MODEL_PATH = Path(localPath + "/testModel.h5")
+    print("Model path: " + str(MODEL_PATH))
+    print("Result of isFile: " + str(os.path.isfile(MODEL_PATH)))
+    if (MODEL_PATH.exists()):#Returns true if file exists
+        print("File exits. Loaded previous model.")
+        model = load_model(str(MODEL_PATH))
+        return model
+    else:#Build model
+        model = Sequential()
+        #Create layers
+        model.add(Dense(512, input_shape=(vocab_size,)))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.3))
+        model.add(Dense(num_labels))
+        model.add(Activation('softmax'))
+        model.summary()
+        model.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
+        #Unused variable 'history'
+        history = model.fit(x_train, y_train, batch_size=batch_size, epochs=30, verbose=1, validation_split=0.1)
+        model.save("testModel.h5")
+        return model
+
+def predictCategory(userInput):
+    """With given input from user, predicts what category.
+    PARAMETERS - user input as text
+    RETURN - updated model"""
+
+    print("prediciton here")
+
+
 
 #Program starts here
 data = load_training_data(path_to_json)
