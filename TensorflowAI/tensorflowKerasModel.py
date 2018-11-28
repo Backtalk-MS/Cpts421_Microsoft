@@ -1,8 +1,10 @@
 import os, json, re, string, pandas, numpy, pickle
 from pathlib import Path
+from keras import losses #used for compiling models
 from tensorflow.keras import models
 from keras.models import Sequential
 from keras.models import load_model
+from keras.models import model_from_json
 from keras.layers import Activation, Dense, Dropout
 from keras.preprocessing.text import Tokenizer
 from sklearn.preprocessing import LabelBinarizer 
@@ -10,7 +12,9 @@ from sklearn.preprocessing import LabelBinarizer
 
 # Path to directory containing all training data
 localPath = os.path.dirname(os.path.abspath(__file__))
-path_to_json = localPath + "..\\Sample Data\\"
+path_to_json = localPath + "\\..\\Sample Data\\"
+tokenizer = Tokenizer(num_words=15000)
+encoder = LabelBinarizer()
 
 def load_training_data(data_path):
     """Reads the scrapped json documents stored on the local machine and load
@@ -40,7 +44,7 @@ def train_model(data):
     RETURN - trained model
     """
 
-    LABELS = "subcategory"
+    LABELS = "category"
     train_size = int(len(data) * .8)
     
     train_text = data['text'][:train_size]
@@ -55,27 +59,51 @@ def train_model(data):
     vocab_size = 15000
     batch_size = 100
 
-    tokenizer = Tokenizer(num_words=vocab_size)
+    #tokenizer = Tokenizer(num_words=vocab_size)
     tokenizer.fit_on_texts(train_text)
 
     x_train = tokenizer.texts_to_matrix(train_text, mode='tfidf')
     x_test = tokenizer.texts_to_matrix(test_text, mode='tfidf')
 
-    encoder = LabelBinarizer()
+    #encoder = LabelBinarizer() #Moved to global
     encoder.fit(train_tags)
     y_train = encoder.transform(train_tags)
     y_test = encoder.transform(test_tags)
 
     myModel = buildModel(num_labels, vocab_size, x_train, y_train, batch_size)
 
-    with open('tokenizer.pickle', 'wb') as handle:#Saves tokens to help for speeding up next run
-        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
     score = myModel.evaluate(x_test, y_test, batch_size=batch_size, verbose=1)
 
     print('Test Accuracy: ', score[1])
     print("Score: ", score) #[2.1682879958161054, 0.6556665238172553]
+    return myModel
+
+def saveTrainedModel(trainedModel, tokenizer):
+    """Saving trained model to HDF5 file, and saving tokenizer to local directory.
+    PARAMETER - trained model with tokenizer
+    RETURN - NULL"""
+
+    #Save model and tokenizer
+    trainedModel.save('trainedModel.h5')
+
+    #Saves tokenizer (ie. Vocabulary)
+    with open('tokenizer.pickle', 'wb') as handle:
+        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("Saved model to disk.")
     return
+
+def loadTrainedModel(modelPath):
+    """Loads a previously trained and saved model to local directory into memory.
+    PARAMETER - path of where to load model
+    RETURN - loaded trained model"""
+
+    loadedTrainedModel = load_model(modelPath)
+    #Loads tokenizer (ie. Vocabulary)
+    with open('tokenizer.pickle', 'rb') as handle:
+        tokenizer = pickle.load(handle)
+    loadedTrainedModel.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    print("Loaded model from disk.")
+    return loadedTrainedModel
 
 #Currently does more than just buildModel. Needs refactoring
 def buildModel(num_labels, vocab_size, x_train, y_train, batch_size):
@@ -85,39 +113,43 @@ def buildModel(num_labels, vocab_size, x_train, y_train, batch_size):
         (vocab_size), x_train, y_train, and the rate of the learning (batch_size)
     RETURN - the built model"""
     
-    MODEL_PATH = Path(localPath + "/testModel.h5")
-    print("Model path: " + str(MODEL_PATH))
-    print("Result of isFile: " + str(os.path.isfile(MODEL_PATH)))
-    if (MODEL_PATH.exists()):#Returns true if file exists
-        print("File exits. Loaded previous model.")
-        model = load_model(str(MODEL_PATH))
-        return model
-    else:#Build model
-        model = Sequential()
+    #Make uniform string for paths match the ones in saveTrainedModel and loadTrainedModel functions
+    MODEL_PATH = Path(localPath + "/trainedModel.h5")
+    if (MODEL_PATH.exists()):#Load file
+        myModel = loadTrainedModel(str(MODEL_PATH))
+        return myModel
+    else:#Build model and save
+        myModel = Sequential()
         #Create layers
-        model.add(Dense(512, input_shape=(vocab_size,)))
-        model.add(Activation('relu'))
-        model.add(Dropout(0.3))
-        model.add(Dense(num_labels))
-        model.add(Activation('softmax'))
-        model.summary()
-        model.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
+        myModel.add(Dense(512, input_shape=(vocab_size,)))
+        myModel.add(Activation('relu'))
+        myModel.add(Dropout(0.3))
+        myModel.add(Dense(num_labels))
+        myModel.add(Activation('softmax'))
+        myModel.summary()
+        myModel.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
         #Unused variable 'history'
-        history = model.fit(x_train, y_train, batch_size=batch_size, epochs=30, verbose=1, validation_split=0.1)
-        model.save("testModel.h5")
-        return model
+        history = myModel.fit(x_train, y_train, batch_size=batch_size, epochs=15, verbose=1, validation_split=0.1)#Train
+        saveTrainedModel(myModel, tokenizer)
+        return myModel
 
-def predictCategory(model, userInput):
+def predictCategory(myModel, userInput):
     """With given input from user, predicts what category.
     PARAMETERS - an AI model as a keras model and user input as
         text to categorize (predict to)
-    RETURN - updated model"""
+    RETURN - predicted label for userInput"""
 
-    print("predictCategory() not yet implemented")
-    return model
+    #These are used to check the predicted label. MUST BE ORGANIZED same way as encoded
+    labels = numpy.array(['msoffice', 'outlook', 'windows', 'xbox'])
+    matrixedInput = tokenizer.texts_to_matrix(userInput, mode='tfidf')
+    prediction = myModel.predict(numpy.array[matrixedInput])
+    #prediction label is a string matching the prediction within the 'labels' array
+    predictedLabel = labels[numpy.argmax(prediction[0])]
+    return predictedLabel
 
+#This should be part of the database class
 def insertIntoDatabase(contents):
-    """Inputs given contents to the set database AFTER prediciton.
+    """Inputs given contents to the set database.
     PARAMETERS - contents as an array for either a string
         or a string and the predicted category.
     RETURN - NULL"""
@@ -128,12 +160,14 @@ def insertIntoDatabase(contents):
 
 
 #Program starts here
-if(os.path.isdir(path_to_json)):
-    print("Found dir to json files")
-else:
-    print("Could not find json dir")
+data = load_training_data(path_to_json)
+trainedModel = train_model(data)
+content = "When I'm in Microsoft word, the line spacing doesn't seem "
+content += "to be uniform when I select parts of the text and select the "
+content += "line spacing to be 1.15. It works however when I select all of "
+content += "the text and then choose the line spacing."
 
-#data = load_training_data(path_to_json)
-#train_model(data)
+prediction = predictCategory(trainedModel, content)
+print(prediction)
 
 exit()#Program stops here
