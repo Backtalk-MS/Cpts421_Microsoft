@@ -14,7 +14,7 @@ from sklearn.preprocessing import LabelBinarizer
 localPath = os.path.dirname(os.path.abspath(__file__))
 path_to_json = localPath + "\\..\\Sample Data\\"
 tokenizer = Tokenizer(num_words=15000)
-encoder = LabelBinarizer()
+trainTagsArr = []
 
 def load_training_data(data_path):
     """Reads the scrapped json documents stored on the local machine and load
@@ -44,6 +44,8 @@ def train_model(data):
     RETURN - trained model
     """
 
+    global trainTagsArr
+
     LABELS = "category"
     train_size = int(len(data) * .8)
     
@@ -52,6 +54,8 @@ def train_model(data):
 
     test_text = data['text'][train_size:]
     test_tags = data[LABELS][train_size:]
+
+    trainTagsArr = train_tags
 
     #print(len(set(data['category'])))
     # Dyamically set the number of LABELS
@@ -65,7 +69,7 @@ def train_model(data):
     x_train = tokenizer.texts_to_matrix(train_text, mode='tfidf')
     x_test = tokenizer.texts_to_matrix(test_text, mode='tfidf')
 
-    #encoder = LabelBinarizer() #Moved to global
+    encoder = LabelBinarizer()
     encoder.fit(train_tags)
     y_train = encoder.transform(train_tags)
     y_test = encoder.transform(test_tags)
@@ -97,6 +101,8 @@ def loadTrainedModel(modelPath):
     PARAMETER - path of where to load model
     RETURN - loaded trained model"""
 
+    global tokenizer
+
     loadedTrainedModel = load_model(modelPath)
     #Loads tokenizer (ie. Vocabulary)
     with open('tokenizer.pickle', 'rb') as handle:
@@ -112,6 +118,8 @@ def buildModel(num_labels, vocab_size, x_train, y_train, batch_size):
     PARAMETER - the number of labels (num_labels), the size of the vocabulary
         (vocab_size), x_train, y_train, and the rate of the learning (batch_size)
     RETURN - the built model"""
+
+    global tokenizer
     
     #Make uniform string for paths match the ones in saveTrainedModel and loadTrainedModel functions
     MODEL_PATH = Path(localPath + "/trainedModel.h5")
@@ -130,6 +138,9 @@ def buildModel(num_labels, vocab_size, x_train, y_train, batch_size):
         myModel.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
         #Unused variable 'history'
         history = myModel.fit(x_train, y_train, batch_size=batch_size, epochs=15, verbose=1, validation_split=0.1)#Train
+        
+        myModel.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
         saveTrainedModel(myModel, tokenizer)
         return myModel
 
@@ -140,9 +151,11 @@ def predictCategory(myModel, userInput):
     RETURN - predicted label for userInput"""
 
     #These are used to check the predicted label. MUST BE ORGANIZED same way as encoded
-    labels = numpy.array(['msoffice', 'outlook', 'windows', 'xbox'])
+    #labels = numpy.array(['msoffice', 'outlook', 'windows', 'xbox'])
+
+    labels = numpy.array(trainTagsArr)
     matrixedInput = tokenizer.texts_to_matrix(userInput, mode='tfidf')
-    prediction = myModel.predict(numpy.array[matrixedInput])
+    prediction = myModel.predict(numpy.array(matrixedInput))
     #prediction label is a string matching the prediction within the 'labels' array
     predictedLabel = labels[numpy.argmax(prediction[0])]
     return predictedLabel
@@ -157,17 +170,33 @@ def insertIntoDatabase(contents):
     print("insertIntoDatabase() not yet implemented")
     return
 
+def setDatabase(param1, param2, param3, param4):
+    """Sets preferred database for the AI to fetch and insert to.
+    PARAMETERS - 
+    RETURN - NULL"""
+
+    return
+
+def recieveString():
+    """Waits for input, returns what user inputted.
+    PARAMETER - NULL
+    RETURN - string"""
+
+    print("Enter your response: ")
+    myString = input()
+    if myString is None:
+        myString = ""
+
+    return myString
+
 
 
 #Program starts here
 data = load_training_data(path_to_json)
 trainedModel = train_model(data)
-content = "When I'm in Microsoft word, the line spacing doesn't seem "
-content += "to be uniform when I select parts of the text and select the "
-content += "line spacing to be 1.15. It works however when I select all of "
-content += "the text and then choose the line spacing."
-
-prediction = predictCategory(trainedModel, content)
-print(prediction)
+while(True):
+    content = recieveString()#Get input from console
+    prediction = predictCategory(trainedModel, str(content))
+    print(prediction)
 
 exit()#Program stops here
